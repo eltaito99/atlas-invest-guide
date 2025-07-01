@@ -1,143 +1,299 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowUp, TrendingUp, Shield, Bell } from "lucide-react";
-import { Link } from "react-router-dom";
 import { Chatbot } from "@/components/Chatbot";
+import {
+  ArrowRight,
+  LineChart,
+  BarChart,
+  PieChart,
+  TrendingUp,
+  TrendingDown,
+  ChevronsUpDown,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Sparkline } from "@/components/Sparkline";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 const Index = () => {
+  const [data, setData] = useState([
+    {
+      date: "2023-01-01",
+      revenue: 50000,
+      profit: 15000,
+      expenses: 35000,
+      visitors: 150,
+    },
+    {
+      date: "2023-01-08",
+      revenue: 55000,
+      profit: 16500,
+      expenses: 38500,
+      visitors: 165,
+    },
+    {
+      date: "2023-01-15",
+      revenue: 62000,
+      profit: 18600,
+      expenses: 43400,
+      visitors: 186,
+    },
+    {
+      date: "2023-01-22",
+      revenue: 58000,
+      profit: 17400,
+      expenses: 40600,
+      visitors: 174,
+    },
+    {
+      date: "2023-01-29",
+      revenue: 70000,
+      profit: 21000,
+      expenses: 49000,
+      visitors: 210,
+    },
+  ]);
+
+  const [transactions, setTransactions] = useState([
+    {
+      id: "728ed52f",
+      date: "2023-09-21",
+      description: "Withdrawal",
+      amount: "$79,00",
+      status: "pending",
+      type: "withdrawal",
+    },
+    {
+      id: "d144bb63",
+      date: "2023-09-21",
+      description: "Deposit",
+      amount: "$235,00",
+      status: "success",
+      type: "deposit",
+    },
+    {
+      id: "b9b49314",
+      date: "2023-09-20",
+      description: "Withdrawal",
+      amount: "$150,00",
+      status: "success",
+      type: "withdrawal",
+    },
+    {
+      id: "2b66cb98",
+      date: "2023-09-20",
+      description: "Withdrawal",
+      amount: "$95,00",
+      status: "pending",
+      type: "withdrawal",
+    },
+    {
+      id: "7e5a4942",
+      date: "2023-09-19",
+      description: "Deposit",
+      amount: "$125,00",
+      status: "success",
+      type: "deposit",
+    },
+    {
+      id: "c19c9c1f",
+      date: "2023-09-18",
+      description: "Deposit",
+      amount: "$450,00",
+      status: "success",
+      type: "deposit",
+    },
+    {
+      id: "494b634f",
+      date: "2023-09-17",
+      description: "Withdrawal",
+      amount: "$250,00",
+      status: "success",
+      type: "withdrawal",
+    },
+  ]);
+
+  const [sortConfig, setSortConfig] = useState({
+    key: "date",
+    direction: "ascending",
+  });
+
+  const sortedTransactions = [...transactions].sort((a, b) => {
+    const key = sortConfig.key;
+    const direction = sortConfig.direction;
+
+    if (a[key] < b[key]) {
+      return direction === "ascending" ? -1 : 1;
+    }
+    if (a[key] > b[key]) {
+      return direction === "ascending" ? 1 : -1;
+    }
+    return 0;
+  });
+
+  const requestSort = (key) => {
+    let direction = "ascending";
+    if (sortConfig.key === key && sortConfig.direction === "ascending") {
+      direction = "descending";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const totalRevenue = data.reduce((acc, item) => acc + item.revenue, 0);
+  const totalProfit = data.reduce((acc, item) => acc + item.profit, 0);
+  const totalVisitors = data.reduce((acc, item) => acc + item.visitors, 0);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Navigation */}
-      <nav className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-slate-800">Atlas Hedge</span>
-            </div>
-            <div className="hidden md:flex items-center space-x-8">
-              <Link to="/portfolio" className="text-slate-600 hover:text-slate-800 transition-colors">Portfolio</Link>
-              <Link to="/news" className="text-slate-600 hover:text-slate-800 transition-colors">Market News</Link>
-              <Link to="/alerts" className="text-slate-600 hover:text-slate-800 transition-colors">Alerts</Link>
-              <Button asChild className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700">
-                <Link to="/portfolio">Get Started</Link>
-              </Button>
-            </div>
+    <>
+      <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
+        <div className="flex items-center justify-between space-y-2">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">Dashboard</h2>
+            <p className="text-muted-foreground">
+              Track overall performance.
+            </p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Link to="/portfolio" className="text-slate-600 hover:text-slate-800 transition-colors">Portfolio</Link>
+            <Link to="/forecaster" className="text-slate-600 hover:text-slate-800 transition-colors">Forecaster</Link>
+            <Link to="/news" className="text-slate-600 hover:text-slate-800 transition-colors">News</Link>
+            <Link to="/alerts" className="text-slate-600 hover:text-slate-800 transition-colors">Alerts</Link>
           </div>
         </div>
-      </nav>
-
-      {/* Hero Section */}
-      <section className="container mx-auto px-6 py-20">
-        <div className="text-center max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-6xl font-bold text-slate-800 mb-6">
-            Your AI-Powered
-            <span className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent"> Financial Advisor</span>
-          </h1>
-          <p className="text-xl text-slate-600 mb-8 leading-relaxed">
-            Make smarter investment decisions with real-time market analysis, personalized portfolio management, and intelligent alerts. Atlas Hedge combines cutting-edge AI with financial expertise.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-lg px-8 py-6">
-              <Link to="/portfolio">Start Building Portfolio</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="text-lg px-8 py-6 border-slate-300 hover:bg-slate-50">
-              <Link to="/news">View Market News</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="container mx-auto px-6 py-20">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-slate-800 mb-4">Why Choose Atlas Hedge?</h2>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Our platform combines advanced analytics with intuitive design to help you make informed investment decisions.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          <Card className="border-slate-200 hover:shadow-lg transition-shadow duration-300">
-            <CardHeader className="text-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <TrendingUp className="w-6 h-6 text-white" />
-              </div>
-              <CardTitle className="text-slate-800">Portfolio Management</CardTitle>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Revenue
+              </CardTitle>
+              <LineChart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <CardDescription className="text-center text-slate-600">
-                Track your investments in real-time with comprehensive portfolio analytics and performance insights.
-              </CardDescription>
+              <div className="text-2xl font-bold">${totalRevenue}</div>
+              <p className="text-sm font-medium text-muted-foreground">
+                +20.1% from last month
+              </p>
             </CardContent>
           </Card>
-
-          <Card className="border-slate-200 hover:shadow-lg transition-shadow duration-300">
-            <CardHeader className="text-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <ArrowUp className="w-6 h-6 text-white" />
-              </div>
-              <CardTitle className="text-slate-800">Market Intelligence</CardTitle>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Profit</CardTitle>
+              <BarChart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <CardDescription className="text-center text-slate-600">
-                Stay informed with curated financial news and AI-powered market analysis to guide your decisions.
-              </CardDescription>
+              <div className="text-2xl font-bold">${totalProfit}</div>
+              <p className="text-sm font-medium text-muted-foreground">
+                +19% from last month
+              </p>
             </CardContent>
           </Card>
-
-          <Card className="border-slate-200 hover:shadow-lg transition-shadow duration-300">
-            <CardHeader className="text-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Bell className="w-6 h-6 text-white" />
-              </div>
-              <CardTitle className="text-slate-800">Smart Alerts</CardTitle>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Visitors</CardTitle>
+              <PieChart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <CardDescription className="text-center text-slate-600">
-                Receive personalized alerts about buying opportunities and market movements that affect your portfolio.
-              </CardDescription>
+              <div className="text-2xl font-bold">{totalVisitors}</div>
+              <p className="text-sm font-medium text-muted-foreground">
+                +180% from last month
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Stock Performance
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">+12.24%</div>
+              <p className="text-sm font-medium text-muted-foreground">
+                +19% from last month
+              </p>
             </CardContent>
           </Card>
         </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="bg-gradient-to-r from-slate-800 to-slate-900 py-20">
-        <div className="container mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">Ready to Take Control of Your Investments?</h2>
-          <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
-            Join thousands of investors who trust Atlas Hedge to guide their financial decisions.
-          </p>
-          <Button asChild size="lg" className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-lg px-8 py-6">
-            <Link to="/portfolio">Get Started Today</Link>
-          </Button>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <Card className="col-span-4">
+            <CardHeader>
+              <CardTitle>Revenue</CardTitle>
+            </CardHeader>
+            <CardContent className="pl-2">
+              <Sparkline data={data} />
+            </CardContent>
+          </Card>
+          <Card className="col-span-3">
+            <CardHeader>
+              <CardTitle>Recent Transactions</CardTitle>
+              <CardDescription>
+                Latest transactions in your account
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead
+                      onClick={() => requestSort("date")}
+                      className="cursor-pointer"
+                    >
+                      Date
+                      <ChevronsUpDown />
+                    </TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead
+                      onClick={() => requestSort("amount")}
+                      className="text-right cursor-pointer"
+                    >
+                      Amount
+                      <ChevronsUpDown />
+                    </TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sortedTransactions.map((transaction) => (
+                    <TableRow key={transaction.id}>
+                      <TableCell className="font-medium">
+                        {transaction.date}
+                      </TableCell>
+                      <TableCell>{transaction.description}</TableCell>
+                      <TableCell className="text-right">
+                        {transaction.amount}
+                      </TableCell>
+                      <TableCell>
+                        <span
+                          className={cn(
+                            "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                            transaction.status === "success"
+                              ? "bg-green-500 text-white"
+                              : "bg-yellow-500 text-white"
+                          )}
+                        >
+                          {transaction.status}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-slate-800 text-slate-300 py-12">
-        <div className="container mx-auto px-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold">Atlas Hedge</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Shield className="w-4 h-4" />
-              <span className="text-sm">Secure & Trusted Financial Advisory</span>
-            </div>
-          </div>
-        </div>
-      </footer>
-
-      {/* Chatbot */}
+      </div>
       <Chatbot />
-    </div>
+    </>
   );
 };
 

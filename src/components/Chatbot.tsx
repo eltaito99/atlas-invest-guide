@@ -20,6 +20,8 @@ const predefinedResponses = [
   "I'd be happy to help you understand market movements. Are you interested in any particular stocks or sectors?",
   "For personalized portfolio advice, I'd need to know more about your investment goals and risk tolerance. Can you share more details?",
   "That's a great question! Market volatility is normal, and having a long-term perspective usually helps. What's your investment timeline?",
+  "You can use our Stock Forecaster tool to get detailed analysis including DCF valuation, technical indicators, and financial metrics for any stock!",
+  "Try searching for stocks like AAPL or MSFT in our Forecaster section to see comprehensive analysis with charts and technical indicators.",
 ];
 
 export const Chatbot = () => {
