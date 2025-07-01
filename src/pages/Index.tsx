@@ -1,8 +1,8 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowUp, TrendingUp, Shield, Bell } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Chatbot } from "@/components/Chatbot";
 
 const Index = () => {
   return (
@@ -134,6 +134,9 @@ const Index = () => {
           </div>
         </div>
       </footer>
+
+      {/* Chatbot */}
+      <Chatbot />
     </div>
   );
 };
