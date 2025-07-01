@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Chatbot } from "@/components/Chatbot";
@@ -11,7 +12,6 @@ import {
   ChevronsUpDown,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Sparkline } from "@/components/Sparkline";
 import {
   Table,
   TableBody,
@@ -227,10 +227,12 @@ const Index = () => {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
           <Card className="col-span-4">
             <CardHeader>
-              <CardTitle>Revenue</CardTitle>
+              <CardTitle>Overview</CardTitle>
             </CardHeader>
             <CardContent className="pl-2">
-              <Sparkline data={data} />
+              <div className="h-[350px] flex items-center justify-center text-muted-foreground">
+                Chart placeholder - Revenue trends would be displayed here
+              </div>
             </CardContent>
           </Card>
           <Card className="col-span-3">
