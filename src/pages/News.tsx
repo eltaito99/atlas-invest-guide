@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -118,7 +117,9 @@ const News = () => {
             </div>
             <div className="flex items-center space-x-4">
               <Link to="/portfolio" className="text-slate-600 hover:text-slate-800 transition-colors">Portfolio</Link>
+              <Link to="/forecaster" className="text-slate-600 hover:text-slate-800 transition-colors">Forecaster</Link>
               <Link to="/alerts" className="text-slate-600 hover:text-slate-800 transition-colors">Alerts</Link>
+              <Link to="/social" className="text-slate-600 hover:text-slate-800 transition-colors">Social</Link>
             </div>
           </div>
         </div>

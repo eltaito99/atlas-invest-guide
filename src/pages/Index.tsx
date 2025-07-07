@@ -22,6 +22,7 @@ const Index = () => {
               <Link to="/forecaster" className="text-slate-600 hover:text-slate-800 transition-colors">Forecaster</Link>
               <Link to="/news" className="text-slate-600 hover:text-slate-800 transition-colors">Market News</Link>
               <Link to="/alerts" className="text-slate-600 hover:text-slate-800 transition-colors">Alerts</Link>
+              <Link to="/social" className="text-slate-600 hover:text-slate-800 transition-colors">Social</Link>
               <Button asChild className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700">
                 <Link to="/auth">Get Started</Link>
               </Button>
