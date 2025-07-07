@@ -118,8 +118,10 @@ const Portfolio = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              <Link to="/forecaster" className="text-slate-600 hover:text-slate-800 transition-colors">Forecaster</Link>
               <Link to="/news" className="text-slate-600 hover:text-slate-800 transition-colors">Market News</Link>
               <Link to="/alerts" className="text-slate-600 hover:text-slate-800 transition-colors">Alerts</Link>
+              <Link to="/social" className="text-slate-600 hover:text-slate-800 transition-colors">Social</Link>
             </div>
           </div>
         </div>

@@ -154,7 +154,9 @@ const Alerts = () => {
             </div>
             <div className="flex items-center space-x-4">
               <Link to="/portfolio" className="text-slate-600 hover:text-slate-800 transition-colors">Portfolio</Link>
+              <Link to="/forecaster" className="text-slate-600 hover:text-slate-800 transition-colors">Forecaster</Link>
               <Link to="/news" className="text-slate-600 hover:text-slate-800 transition-colors">Market News</Link>
+              <Link to="/social" className="text-slate-600 hover:text-slate-800 transition-colors">Social</Link>
             </div>
           </div>
         </div>
