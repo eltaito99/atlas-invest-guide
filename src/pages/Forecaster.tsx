@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,23 +37,26 @@ const Forecaster = () => {
                 </div>
                 <h1 className="text-2xl font-bold text-slate-800">Atlas Hedge</h1>
               </div>
-              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                <Link to="/" className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">
-                  Home
-                </Link>
-                <Link to="/portfolio" className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">
-                  Portfolio
-                </Link>
-                <Link to="/forecaster" className="text-blue-600 border-b-2 border-blue-600 px-3 py-2 text-sm font-medium">
-                  Forecaster
-                </Link>
-                <Link to="/news" className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">
-                  Market News
-                </Link>
-                <Link to="/alerts" className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">
-                  Alerts
-                </Link>
-              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Link to="/" className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">
+                Home
+              </Link>
+              <Link to="/portfolio" className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">
+                Portfolio
+              </Link>
+              <Link to="/forecaster" className="text-blue-600 border-b-2 border-blue-600 px-3 py-2 text-sm font-medium">
+                Forecaster
+              </Link>
+              <Link to="/news" className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">
+                Market News
+              </Link>
+              <Link to="/alerts" className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">
+                Alerts
+              </Link>
+              <Link to="/social" className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">
+                Social
+              </Link>
             </div>
           </div>
         </div>
