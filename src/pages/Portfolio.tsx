@@ -1,4 +1,5 @@
 
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -122,6 +123,7 @@ const Portfolio = () => {
               <Link to="/news" className="text-slate-600 hover:text-slate-800 transition-colors">Market News</Link>
               <Link to="/alerts" className="text-slate-600 hover:text-slate-800 transition-colors">Alerts</Link>
               <Link to="/social" className="text-slate-600 hover:text-slate-800 transition-colors">Social</Link>
+              <Link to="/about" className="text-slate-600 hover:text-slate-800 transition-colors">About Us</Link>
             </div>
           </div>
         </div>
@@ -269,3 +271,4 @@ const Portfolio = () => {
 };
 
 export default Portfolio;
+

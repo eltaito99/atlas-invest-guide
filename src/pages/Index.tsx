@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowUp, TrendingUp, Shield, Bell } from "lucide-react";
@@ -23,6 +24,7 @@ const Index = () => {
               <Link to="/news" className="text-slate-600 hover:text-slate-800 transition-colors">Market News</Link>
               <Link to="/alerts" className="text-slate-600 hover:text-slate-800 transition-colors">Alerts</Link>
               <Link to="/social" className="text-slate-600 hover:text-slate-800 transition-colors">Social</Link>
+              <Link to="/about" className="text-slate-600 hover:text-slate-800 transition-colors">About Us</Link>
               <Button asChild className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700">
                 <Link to="/auth">Get Started</Link>
               </Button>
@@ -144,3 +146,4 @@ const Index = () => {
 };
 
 export default Index;
+
