@@ -9,6 +9,7 @@ import Portfolio from "./pages/Portfolio";
 import Forecaster from "./pages/Forecaster";
 import News from "./pages/News";
 import Alerts from "./pages/Alerts";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/forecaster" element={<Forecaster />} />
           <Route path="/news" element={<News />} />
           <Route path="/alerts" element={<Alerts />} />
+          <Route path="/auth" element={<Auth />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
