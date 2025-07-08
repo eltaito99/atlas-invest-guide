@@ -178,6 +178,115 @@ const Portfolio = () => {
           </Card>
         </div>
 
+        {/* Analysis & Risk Metrics */}
+        <div className="grid lg:grid-cols-3 gap-8 mb-8">
+          {/* Sector Allocation */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Sector Allocation</CardTitle>
+              <CardDescription>Portfolio breakdown by sector</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Technology</span>
+                  <span className="text-sm font-semibold">65%</span>
+                </div>
+                <div className="w-full bg-slate-200 rounded-full h-2">
+                  <div className="bg-blue-600 h-2 rounded-full" style={{ width: '65%' }}></div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Healthcare</span>
+                  <span className="text-sm font-semibold">20%</span>
+                </div>
+                <div className="w-full bg-slate-200 rounded-full h-2">
+                  <div className="bg-green-600 h-2 rounded-full" style={{ width: '20%' }}></div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Financial</span>
+                  <span className="text-sm font-semibold">15%</span>
+                </div>
+                <div className="w-full bg-slate-200 rounded-full h-2">
+                  <div className="bg-purple-600 h-2 rounded-full" style={{ width: '15%' }}></div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Geographical Allocation */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Geographic Allocation</CardTitle>
+              <CardDescription>Portfolio breakdown by region</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">North America</span>
+                  <span className="text-sm font-semibold">75%</span>
+                </div>
+                <div className="w-full bg-slate-200 rounded-full h-2">
+                  <div className="bg-blue-600 h-2 rounded-full" style={{ width: '75%' }}></div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Europe</span>
+                  <span className="text-sm font-semibold">15%</span>
+                </div>
+                <div className="w-full bg-slate-200 rounded-full h-2">
+                  <div className="bg-green-600 h-2 rounded-full" style={{ width: '15%' }}></div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Asia Pacific</span>
+                  <span className="text-sm font-semibold">10%</span>
+                </div>
+                <div className="w-full bg-slate-200 rounded-full h-2">
+                  <div className="bg-purple-600 h-2 rounded-full" style={{ width: '10%' }}></div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Risk Metrics */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Risk Analysis</CardTitle>
+              <CardDescription>Portfolio risk metrics</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm font-medium">Value at Risk (VaR)</span>
+                    <span className="text-sm text-red-600">-2.8%</span>
+                  </div>
+                  <p className="text-xs text-slate-500">95% confidence, 1-day horizon</p>
+                </div>
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm font-medium">Portfolio Beta</span>
+                    <span className="text-sm">1.12</span>
+                  </div>
+                  <p className="text-xs text-slate-500">Relative to S&P 500</p>
+                </div>
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm font-medium">Sharpe Ratio</span>
+                    <span className="text-sm text-green-600">1.45</span>
+                  </div>
+                  <p className="text-xs text-slate-500">Risk-adjusted returns</p>
+                </div>
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm font-medium">Max Drawdown</span>
+                    <span className="text-sm text-red-600">-8.2%</span>
+                  </div>
+                  <p className="text-xs text-slate-500">Historical maximum decline</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Holdings List */}
           <Card>

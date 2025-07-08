@@ -80,17 +80,19 @@ const About = () => {
               <CardContent className="p-8 text-center">
                 <Avatar className="w-32 h-32 mx-auto mb-6">
                   <AvatarImage src="/lovable-uploads/8deec6ed-ed5e-4b02-8b47-56647f8a71f8.png" alt="Founder" />
-                  <AvatarFallback className="text-2xl bg-gradient-to-r from-blue-500 to-green-500 text-white">AF</AvatarFallback>
+                  <AvatarFallback className="text-2xl bg-gradient-to-r from-blue-500 to-green-500 text-white">DT</AvatarFallback>
                 </Avatar>
-                <h3 className="text-xl font-bold text-slate-800 mb-2">Alessandro Founder</h3>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">Davide Tait</h3>
                 <p className="text-blue-600 font-semibold mb-4">Co-Founder & CEO</p>
                 <p className="text-slate-600 leading-relaxed mb-6">
                   Experienced financial professional with a strong track record across global markets, financial analysis, and strategic execution. Led corporate strategy and international fundraising for a European fintech company specializing in asset tokenization, and advised top-tier financial institutions of Capital Markets Division on trading, business and technology-driven transformations.
                 </p>
                 <div className="flex justify-center space-x-4">
-                  <Button variant="outline" size="sm">
-                    <Linkedin className="w-4 h-4 mr-2" />
-                    LinkedIn
+                  <Button variant="outline" size="sm" asChild>
+                    <a href="https://www.linkedin.com/in/davide-tait-12b87420b/" target="_blank" rel="noopener noreferrer">
+                      <Linkedin className="w-4 h-4 mr-2" />
+                      LinkedIn
+                    </a>
                   </Button>
                   <Button variant="outline" size="sm">
                     <Mail className="w-4 h-4 mr-2" />
