@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, TrendingUp, DollarSign, BarChart3, Calculator, Activity } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Navigation } from "@/components/Navigation";
 import { Chatbot } from "@/components/Chatbot";
 import { StockChart } from "@/components/StockChart";
 import { CompanySummary } from "@/components/CompanySummary";
@@ -27,44 +27,7 @@ const Forecaster = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-white" />
-                </div>
-                <h1 className="text-2xl font-bold text-slate-800">Atlas Hedge</h1>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link to="/" className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">
-                Home
-              </Link>
-              <Link to="/portfolio" className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">
-                Portfolio
-              </Link>
-              <Link to="/forecaster" className="text-blue-600 border-b-2 border-blue-600 px-3 py-2 text-sm font-medium">
-                Forecaster
-              </Link>
-              <Link to="/news" className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">
-                Market News
-              </Link>
-              <Link to="/alerts" className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">
-                Alerts
-              </Link>
-              <Link to="/social" className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">
-                Social
-              </Link>
-              <Link to="/about" className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">
-                About Us
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
