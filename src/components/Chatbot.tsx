@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChatMessage } from "./ChatMessage";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { User, Session } from "@supabase/supabase-js";
 
 interface Message {
   id: string;
@@ -13,28 +16,62 @@ interface Message {
   timestamp: Date;
 }
 
-const predefinedResponses = [
-  "Hello! I'm Atlas, your AI financial advisor. How can I help you with your investments today?",
-  "I can help you analyze market trends, review your portfolio, and provide investment recommendations. What would you like to discuss?",
-  "Based on current market conditions, diversification across sectors is always a good strategy. Would you like specific recommendations?",
-  "I'd be happy to help you understand market movements. Are you interested in any particular stocks or sectors?",
-  "For personalized portfolio advice, I'd need to know more about your investment goals and risk tolerance. Can you share more details?",
-  "That's a great question! Market volatility is normal, and having a long-term perspective usually helps. What's your investment timeline?",
-];
-
 export const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      text: "Hello! I'm Atlas, your AI financial advisor. How can I help you with your investments today?",
-      isBot: true,
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Initialize chat with welcome message
+          if (messages.length === 0) {
+            setMessages([
+              {
+                id: "1",
+                text: "Hello! I'm Atlas, your AI financial advisor. How can I help you with your investments today?",
+                isBot: true,
+                timestamp: new Date(),
+              },
+            ]);
+          }
+        } else {
+          setMessages([]);
+          setCurrentSessionId(null);
+        }
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user && messages.length === 0) {
+        setMessages([
+          {
+            id: "1",
+            text: "Hello! I'm Atlas, your AI financial advisor. How can I help you with your investments today?",
+            isBot: true,
+            timestamp: new Date(),
+          },
+        ]);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -47,6 +84,15 @@ export const Chatbot = () => {
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to chat with Atlas.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const userMessage: Message = {
       id: Date.now().toString(),
       text: inputValue,
@@ -55,20 +101,58 @@ export const Chatbot = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const messageToSend = inputValue;
     setInputValue("");
     setIsTyping(true);
 
-    // Simulate bot response with delay
-    setTimeout(() => {
+    try {
+      const { data, error } = await supabase.functions.invoke('claude-chat', {
+        body: { 
+          message: messageToSend,
+          sessionId: currentSessionId 
+        },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
-        text: predefinedResponses[Math.floor(Math.random() * predefinedResponses.length)],
+        text: data.message,
         isBot: true,
         timestamp: new Date(),
       };
+
       setMessages(prev => [...prev, botResponse]);
+      
+      // Update session ID if new
+      if (data.sessionId && !currentSessionId) {
+        setCurrentSessionId(data.sessionId);
+      }
+
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+      
+      // Add error message to chat
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "I'm sorry, I'm having trouble connecting right now. Please try again.",
+        isBot: true,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
