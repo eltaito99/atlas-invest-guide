@@ -38,6 +38,48 @@ export type Database = {
         }
         Relationships: []
       }
+      holdings: {
+        Row: {
+          created_at: string
+          current_price: number | null
+          id: string
+          last_price_update: string | null
+          name: string
+          purchase_date: string | null
+          purchase_price: number
+          shares: number
+          symbol: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_price?: number | null
+          id?: string
+          last_price_update?: string | null
+          name: string
+          purchase_date?: string | null
+          purchase_price: number
+          shares: number
+          symbol: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_price?: number | null
+          id?: string
+          last_price_update?: string | null
+          name?: string
+          purchase_date?: string | null
+          purchase_price?: number
+          shares?: number
+          symbol?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -99,6 +141,48 @@ export type Database = {
           full_name?: string | null
           id?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      realized_gains: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          original_holding_id: string | null
+          purchase_price: number
+          realized_gain: number
+          sale_date: string | null
+          sale_price: number
+          shares_sold: number
+          symbol: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          original_holding_id?: string | null
+          purchase_price: number
+          realized_gain: number
+          sale_date?: string | null
+          sale_price: number
+          shares_sold: number
+          symbol: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          original_holding_id?: string | null
+          purchase_price?: number
+          realized_gain?: number
+          sale_date?: string | null
+          sale_price?: number
+          shares_sold?: number
+          symbol?: string
           user_id?: string
         }
         Relationships: []

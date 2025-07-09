@@ -1,15 +1,18 @@
 
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, DollarSign, Plus } from "lucide-react";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { TrendingUp, TrendingDown, DollarSign, Plus, X, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { DailyRewards } from "@/components/DailyRewards";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Holding {
   id: string;
@@ -25,30 +28,14 @@ interface Holding {
 
 const Portfolio = () => {
   const { toast } = useToast();
-  const [holdings, setHoldings] = useState<Holding[]>([
-    {
-      id: "1",
-      symbol: "AAPL",
-      name: "Apple Inc.",
-      shares: 50,
-      purchasePrice: 150,
-      currentPrice: 175,
-      value: 8750,
-      gainLoss: 1250,
-      gainLossPercent: 16.67
-    },
-    {
-      id: "2",
-      symbol: "MSFT",
-      name: "Microsoft Corporation",
-      shares: 30,
-      purchasePrice: 300,
-      currentPrice: 285,
-      value: 8550,
-      gainLoss: -450,
-      gainLossPercent: -5.0
-    }
-  ]);
+  const navigate = useNavigate();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [holdings, setHoldings] = useState<Holding[]>([]);
+  const [selectedHolding, setSelectedHolding] = useState<Holding | null>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [closeQuantity, setCloseQuantity] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const [newHolding, setNewHolding] = useState({
     symbol: "",
@@ -57,11 +44,72 @@ const Portfolio = () => {
     purchasePrice: ""
   });
 
-  const totalValue = holdings.reduce((sum, holding) => sum + holding.value, 0);
-  const totalGainLoss = holdings.reduce((sum, holding) => sum + holding.gainLoss, 0);
-  const totalGainLossPercent = totalValue > 0 ? (totalGainLoss / (totalValue - totalGainLoss)) * 100 : 0;
+  // Check authentication and fetch data
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate('/auth');
+        return;
+      }
+      setUser(user);
+      await fetchHoldings();
+      setLoading(false);
+    };
 
-  const handleAddHolding = () => {
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session?.user) {
+        navigate('/auth');
+      } else {
+        setUser(session.user);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  const fetchHoldings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('holdings')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedHoldings: Holding[] = data.map(holding => {
+        const currentPrice = holding.current_price || holding.purchase_price * (1 + (Math.random() - 0.5) * 0.2);
+        const value = holding.shares * currentPrice;
+        const gainLoss = value - (holding.shares * holding.purchase_price);
+        const gainLossPercent = (gainLoss / (holding.shares * holding.purchase_price)) * 100;
+
+        return {
+          id: holding.id,
+          symbol: holding.symbol,
+          name: holding.name,
+          shares: Number(holding.shares),
+          purchasePrice: Number(holding.purchase_price),
+          currentPrice,
+          value,
+          gainLoss,
+          gainLossPercent
+        };
+      });
+
+      setHoldings(formattedHoldings);
+    } catch (error) {
+      console.error('Error fetching holdings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch your holdings",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleAddHolding = async () => {
     if (!newHolding.symbol || !newHolding.shares || !newHolding.purchasePrice) {
       toast({
         title: "Error",
@@ -71,33 +119,145 @@ const Portfolio = () => {
       return;
     }
 
-    const shares = parseFloat(newHolding.shares);
-    const purchasePrice = parseFloat(newHolding.purchasePrice);
-    const currentPrice = purchasePrice * (1 + (Math.random() - 0.5) * 0.2); // Simulate current price
-    const value = shares * currentPrice;
-    const gainLoss = value - (shares * purchasePrice);
-    const gainLossPercent = (gainLoss / (shares * purchasePrice)) * 100;
+    try {
+      setIsProcessing(true);
+      const shares = parseFloat(newHolding.shares);
+      const purchasePrice = parseFloat(newHolding.purchasePrice);
+      const currentPrice = purchasePrice * (1 + (Math.random() - 0.5) * 0.2);
 
-    const holding: Holding = {
-      id: Date.now().toString(),
-      symbol: newHolding.symbol.toUpperCase(),
-      name: newHolding.name || `${newHolding.symbol.toUpperCase()} Corporation`,
-      shares,
-      purchasePrice,
-      currentPrice,
-      value,
-      gainLoss,
-      gainLossPercent
-    };
+      const { error } = await supabase
+        .from('holdings')
+        .insert({
+          user_id: user.id,
+          symbol: newHolding.symbol.toUpperCase(),
+          name: newHolding.name || `${newHolding.symbol.toUpperCase()} Corporation`,
+          shares,
+          purchase_price: purchasePrice,
+          current_price: currentPrice
+        });
 
-    setHoldings([...holdings, holding]);
-    setNewHolding({ symbol: "", name: "", shares: "", purchasePrice: "" });
-    
-    toast({
-      title: "Success",
-      description: "Holding added to your portfolio"
-    });
+      if (error) throw error;
+
+      await fetchHoldings();
+      setNewHolding({ symbol: "", name: "", shares: "", purchasePrice: "" });
+      
+      toast({
+        title: "Success",
+        description: "Holding added to your portfolio"
+      });
+    } catch (error) {
+      console.error('Error adding holding:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add holding to portfolio",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
+
+  const handleClosePosition = async () => {
+    if (!selectedHolding || !closeQuantity) return;
+
+    const quantityToClose = parseFloat(closeQuantity);
+    if (quantityToClose <= 0 || quantityToClose > selectedHolding.shares) {
+      toast({
+        title: "Error",
+        description: "Invalid quantity",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      const salePrice = selectedHolding.currentPrice;
+      const realizedGain = (salePrice - selectedHolding.purchasePrice) * quantityToClose;
+
+      // Record realized gain
+      await supabase.from('realized_gains').insert({
+        user_id: user.id,
+        symbol: selectedHolding.symbol,
+        name: selectedHolding.name,
+        shares_sold: quantityToClose,
+        purchase_price: selectedHolding.purchasePrice,
+        sale_price: salePrice,
+        realized_gain: realizedGain,
+        original_holding_id: selectedHolding.id
+      });
+
+      if (quantityToClose === selectedHolding.shares) {
+        // Close entire position
+        await supabase.from('holdings').delete().eq('id', selectedHolding.id);
+      } else {
+        // Partial close - update shares
+        const remainingShares = selectedHolding.shares - quantityToClose;
+        await supabase
+          .from('holdings')
+          .update({ shares: remainingShares })
+          .eq('id', selectedHolding.id);
+      }
+
+      await fetchHoldings();
+      setIsSheetOpen(false);
+      setSelectedHolding(null);
+      setCloseQuantity("");
+
+      toast({
+        title: "Success",
+        description: `Position closed. Realized ${realizedGain >= 0 ? 'gain' : 'loss'}: $${Math.abs(realizedGain).toFixed(2)}`
+      });
+    } catch (error) {
+      console.error('Error closing position:', error);
+      toast({
+        title: "Error",
+        description: "Failed to close position",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDeleteHolding = async () => {
+    if (!selectedHolding) return;
+
+    try {
+      setIsProcessing(true);
+      await supabase.from('holdings').delete().eq('id', selectedHolding.id);
+      
+      await fetchHoldings();
+      setIsSheetOpen(false);
+      setSelectedHolding(null);
+
+      toast({
+        title: "Success",
+        description: "Holding removed from portfolio"
+      });
+    } catch (error) {
+      console.error('Error deleting holding:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove holding",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const totalValue = holdings.reduce((sum, holding) => sum + holding.value, 0);
+  const totalGainLoss = holdings.reduce((sum, holding) => sum + holding.gainLoss, 0);
+  const totalGainLossPercent = totalValue > 0 ? (totalGainLoss / (totalValue - totalGainLoss)) * 100 : 0;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -272,26 +432,43 @@ const Portfolio = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {holdings.map((holding) => (
-                  <div key={holding.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <span className="font-semibold">{holding.symbol}</span>
-                        <Badge variant="outline">{holding.shares} shares</Badge>
-                      </div>
-                      <p className="text-sm text-slate-600">{holding.name}</p>
-                      <p className="text-sm text-slate-500">
-                        Avg Cost: ${holding.purchasePrice.toFixed(2)} | Current: ${holding.currentPrice.toFixed(2)}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold">${holding.value.toLocaleString()}</p>
-                      <p className={`text-sm ${holding.gainLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {holding.gainLoss >= 0 ? '+' : ''}${holding.gainLoss.toFixed(0)} ({holding.gainLossPercent.toFixed(1)}%)
-                      </p>
-                    </div>
+                {holdings.length === 0 ? (
+                  <div className="text-center py-8 text-slate-500">
+                    <p>No holdings yet. Add your first stock to get started!</p>
                   </div>
-                ))}
+                ) : (
+                  holdings.map((holding) => (
+                    <div key={holding.id} className="relative flex items-center justify-between p-4 border rounded-lg">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="absolute top-2 right-2 h-6 w-6 p-0 hover:bg-red-100"
+                        onClick={() => {
+                          setSelectedHolding(holding);
+                          setIsSheetOpen(true);
+                        }}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                      <div className="flex-1 pr-8">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <span className="font-semibold">{holding.symbol}</span>
+                          <Badge variant="outline">{holding.shares} shares</Badge>
+                        </div>
+                        <p className="text-sm text-slate-600">{holding.name}</p>
+                        <p className="text-sm text-slate-500">
+                          Avg Cost: ${holding.purchasePrice.toFixed(2)} | Current: ${holding.currentPrice.toFixed(2)}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold">${holding.value.toLocaleString()}</p>
+                        <p className={`text-sm ${holding.gainLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {holding.gainLoss >= 0 ? '+' : ''}${holding.gainLoss.toFixed(0)} ({holding.gainLossPercent.toFixed(1)}%)
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
@@ -343,13 +520,113 @@ const Portfolio = () => {
                     onChange={(e) => setNewHolding({ ...newHolding, purchasePrice: e.target.value })}
                   />
                 </div>
-                <Button onClick={handleAddHolding} className="w-full">
-                  Add to Portfolio
+                <Button 
+                  onClick={handleAddHolding} 
+                  className="w-full"
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Adding...
+                    </>
+                  ) : (
+                    "Add to Portfolio"
+                  )}
                 </Button>
               </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* Bottom Sheet for Close/Delete Position */}
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+          <SheetContent side="bottom" className="h-auto max-w-md mx-auto">
+            <SheetHeader>
+              <SheetTitle>Manage Position</SheetTitle>
+              <SheetDescription>
+                {selectedHolding && `${selectedHolding.symbol} - ${selectedHolding.shares} shares`}
+              </SheetDescription>
+            </SheetHeader>
+            
+            {selectedHolding && (
+              <div className="space-y-4 mt-6">
+                <div className="p-4 bg-slate-50 rounded-lg">
+                  <p className="text-sm text-slate-600 mb-2">Current Position Value</p>
+                  <p className="text-xl font-bold">${selectedHolding.value.toFixed(2)}</p>
+                  <p className={`text-sm ${selectedHolding.gainLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {selectedHolding.gainLoss >= 0 ? '+' : ''}${selectedHolding.gainLoss.toFixed(2)} ({selectedHolding.gainLossPercent.toFixed(1)}%)
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="closeQuantity">Shares to Close (Max: {selectedHolding.shares})</Label>
+                    <Input
+                      id="closeQuantity"
+                      type="number"
+                      min="0"
+                      max={selectedHolding.shares}
+                      step="0.000001"
+                      placeholder={selectedHolding.shares.toString()}
+                      value={closeQuantity}
+                      onChange={(e) => setCloseQuantity(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="flex space-x-2">
+                    <Button
+                      onClick={() => setCloseQuantity(selectedHolding.shares.toString())}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Close All
+                    </Button>
+                    <Button
+                      onClick={() => setCloseQuantity((selectedHolding.shares / 2).toString())}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Close Half
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex space-x-2 pt-4">
+                  <Button
+                    onClick={handleClosePosition}
+                    disabled={isProcessing || !closeQuantity}
+                    className="flex-1"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Closing...
+                      </>
+                    ) : (
+                      "Close Position"
+                    )}
+                  </Button>
+                  <Button
+                    onClick={handleDeleteHolding}
+                    variant="destructive"
+                    disabled={isProcessing}
+                    className="flex-1"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Deleting...
+                      </>
+                    ) : (
+                      "Delete Holding"
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </SheetContent>
+        </Sheet>
       </div>
     </div>
   );
