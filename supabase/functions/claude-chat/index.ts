@@ -18,12 +18,27 @@ serve(async (req) => {
     let body;
     try {
       const requestText = await req.text();
+      console.log('Request method:', req.method, 'Request body length:', requestText.length);
+      
       if (!requestText.trim()) {
-        throw new Error('Empty request body');
+        return new Response(
+          JSON.stringify({ error: 'Empty request body' }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
       }
       body = JSON.parse(requestText);
     } catch (parseError) {
-      throw new Error(`Invalid JSON in request body: ${parseError.message}`);
+      console.error('JSON parse error:', parseError);
+      return new Response(
+        JSON.stringify({ error: `Invalid JSON in request body: ${parseError.message}` }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
     }
     
     const { message, sessionId } = body;
