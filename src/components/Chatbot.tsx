@@ -111,9 +111,6 @@ export const Chatbot = () => {
           message: messageToSend,
           sessionId: currentSessionId 
         },
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-        },
       });
 
       if (error) {

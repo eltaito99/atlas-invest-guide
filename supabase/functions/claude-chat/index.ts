@@ -14,7 +14,19 @@ serve(async (req) => {
   }
 
   try {
-    const { message, sessionId } = await req.json();
+    // Parse request body with error handling
+    let body;
+    try {
+      const requestText = await req.text();
+      if (!requestText.trim()) {
+        throw new Error('Empty request body');
+      }
+      body = JSON.parse(requestText);
+    } catch (parseError) {
+      throw new Error(`Invalid JSON in request body: ${parseError.message}`);
+    }
+    
+    const { message, sessionId } = body;
     
     if (!message) {
       throw new Error('No message provided');
