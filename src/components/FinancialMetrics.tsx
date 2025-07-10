@@ -1,96 +1,22 @@
 
-import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingUp, TrendingDown, DollarSign, BarChart3 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 
 interface FinancialMetricsProps {
   symbol: string;
 }
 
 export const FinancialMetrics = ({ symbol }: FinancialMetricsProps) => {
-  const [financialData, setFinancialData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchFinancialData = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const { data, error } = await supabase.functions.invoke('market-data', {
-          body: { symbol, type: 'stock' }
-        });
-        
-        if (error) throw error;
-        setFinancialData(data);
-      } catch (err) {
-        console.error('Error fetching financial data:', err);
-        setError('Failed to load financial data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (symbol) {
-      fetchFinancialData();
-    }
-  }, [symbol]);
-
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-48" />
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[...Array(4)].map((_, i) => (
-                <Card key={i}>
-                  <CardContent className="p-4">
-                    <Skeleton className="h-4 w-16 mb-2" />
-                    <Skeleton className="h-8 w-20 mb-1" />
-                    <Skeleton className="h-3 w-12" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (error || !financialData) {
-    return (
-      <Card>
-        <CardContent className="p-6 text-center">
-          <div className="text-red-500 mb-2">Failed to load financial data</div>
-          <p className="text-sm text-gray-500">Please try searching for another symbol</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const formatValue = (value: number, type: string) => {
-    if (!value) return 'N/A';
-    
-    switch (type) {
-      case 'currency':
-        return value >= 1e12 ? `${(value / 1e12).toFixed(1)}T` :
-               value >= 1e9 ? `${(value / 1e9).toFixed(1)}B` :
-               value >= 1e6 ? `${(value / 1e6).toFixed(1)}M` :
-               `${value.toFixed(0)}`;
-      case 'percentage':
-        return `${(value * 100).toFixed(1)}%`;
-      case 'ratio':
-        return value.toFixed(2);
-      default:
-        return value.toString();
-    }
+  // Mock data - in a real app, this would come from a financial API
+  const financialData = {
+    revenue: { value: "394.3B", change: 8.1, period: "TTM" },
+    netIncome: { value: "99.8B", change: 5.4, period: "TTM" },
+    eps: { value: "6.13", change: 4.8, period: "TTM" },
+    peRatio: { value: "30.3", change: -2.1, period: "Current" },
+    grossMargin: { value: "44.1%", change: 1.2, period: "TTM" },
+    operatingMargin: { value: "29.8%", change: 0.8, period: "TTM" },
+    roe: { value: "26.4%", change: 2.3, period: "TTM" },
+    debtToEquity: { value: "1.73", change: -0.15, period: "Current" },
   };
 
   const MetricCard = ({ 
@@ -134,30 +60,30 @@ export const FinancialMetrics = ({ symbol }: FinancialMetricsProps) => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <MetricCard
               title="Revenue"
-              value={`$${formatValue(financialData.totalRevenue, 'currency')}`}
-              change={Math.random() * 10 - 5} // Mock change until we have historical data
-              period="TTM"
+              value={financialData.revenue.value}
+              change={financialData.revenue.change}
+              period={financialData.revenue.period}
               icon={DollarSign}
             />
             <MetricCard
               title="Net Income"
-              value={`$${formatValue(financialData.netIncomeToCommon, 'currency')}`}
-              change={Math.random() * 10 - 5}
-              period="TTM"
+              value={financialData.netIncome.value}
+              change={financialData.netIncome.change}
+              period={financialData.netIncome.period}
               icon={TrendingUp}
             />
             <MetricCard
               title="EPS"
-              value={financialData.trailingEps ? `$${financialData.trailingEps.toFixed(2)}` : 'N/A'}
-              change={Math.random() * 10 - 5}
-              period="TTM"
+              value={financialData.eps.value}
+              change={financialData.eps.change}
+              period={financialData.eps.period}
               icon={BarChart3}
             />
             <MetricCard
               title="P/E Ratio"
-              value={financialData.trailingPE ? financialData.trailingPE.toFixed(2) : 'N/A'}
-              change={Math.random() * 10 - 5}
-              period="Current"
+              value={financialData.peRatio.value}
+              change={financialData.peRatio.change}
+              period={financialData.peRatio.period}
               icon={BarChart3}
             />
           </div>
@@ -172,30 +98,30 @@ export const FinancialMetrics = ({ symbol }: FinancialMetricsProps) => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <MetricCard
               title="Gross Margin"
-              value={formatValue(financialData.grossMargins, 'percentage')}
-              change={Math.random() * 5 - 2.5}
-              period="TTM"
+              value={financialData.grossMargin.value}
+              change={financialData.grossMargin.change}
+              period={financialData.grossMargin.period}
               icon={BarChart3}
             />
             <MetricCard
               title="Operating Margin"
-              value={formatValue(financialData.operatingMargins, 'percentage')}
-              change={Math.random() * 5 - 2.5}
-              period="TTM"
+              value={financialData.operatingMargin.value}
+              change={financialData.operatingMargin.change}
+              period={financialData.operatingMargin.period}
               icon={BarChart3}
             />
             <MetricCard
               title="ROE"
-              value={formatValue(financialData.returnOnEquity, 'percentage')}
-              change={Math.random() * 5 - 2.5}
-              period="TTM"
+              value={financialData.roe.value}
+              change={financialData.roe.change}
+              period={financialData.roe.period}
               icon={TrendingUp}
             />
             <MetricCard
               title="Debt/Equity"
-              value={formatValue(financialData.debtToEquity, 'ratio')}
-              change={Math.random() * 5 - 2.5}
-              period="Current"
+              value={financialData.debtToEquity.value}
+              change={financialData.debtToEquity.change}
+              period={financialData.debtToEquity.period}
               icon={BarChart3}
             />
           </div>
