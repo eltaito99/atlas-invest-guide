@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, TrendingUp, DollarSign, BarChart3, Calculator, Activity } from "lucide-react";
+import { Search, TrendingUp, DollarSign, BarChart3, Calculator, Activity, Loader2 } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { Chatbot } from "@/components/Chatbot";
 import { StockChart } from "@/components/StockChart";
@@ -13,15 +13,41 @@ import { CompanySummary } from "@/components/CompanySummary";
 import { FinancialMetrics } from "@/components/FinancialMetrics";
 import { DCFValuation } from "@/components/DCFValuation";
 import { TechnicalAnalysis } from "@/components/TechnicalAnalysis";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 const Forecaster = () => {
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStock, setSelectedStock] = useState("AAPL");
+  const [marketData, setMarketData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
       setSelectedStock(searchTerm.toUpperCase());
+      setLoading(true);
+      
+      try {
+        // Fetch market data for the symbol
+        const { data, error } = await supabase.functions.invoke('market-data', {
+          body: { symbol: searchTerm.trim(), type: 'stock' }
+        });
+        
+        if (error) throw error;
+        
+        setMarketData(data);
+      } catch (error) {
+        console.error('Error fetching market data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch market data for " + searchTerm,
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -49,8 +75,22 @@ const Forecaster = () => {
                   className="pl-10"
                 />
               </div>
-              <Button type="submit" className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700">
-                Analyze
+              <Button 
+                type="submit" 
+                className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Searching...
+                  </>
+                ) : (
+                  <>
+                    <Search className="w-4 h-4 mr-2" />
+                    Analyze
+                  </>
+                )}
               </Button>
             </form>
           </CardContent>

@@ -40,6 +40,7 @@ export type Database = {
       }
       holdings: {
         Row: {
+          asset_type: string | null
           created_at: string
           current_price: number | null
           id: string
@@ -53,6 +54,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          asset_type?: string | null
           created_at?: string
           current_price?: number | null
           id?: string
@@ -66,6 +68,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          asset_type?: string | null
           created_at?: string
           current_price?: number | null
           id?: string

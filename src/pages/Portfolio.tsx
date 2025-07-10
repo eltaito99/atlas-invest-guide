@@ -24,6 +24,7 @@ interface Holding {
   value: number;
   gainLoss: number;
   gainLossPercent: number;
+  assetType?: string;
 }
 
 const Portfolio = () => {
@@ -41,7 +42,8 @@ const Portfolio = () => {
     symbol: "",
     name: "",
     shares: "",
-    purchasePrice: ""
+    purchasePrice: "",
+    assetType: "stock"
   });
 
   // Check authentication and fetch data
@@ -79,8 +81,37 @@ const Portfolio = () => {
 
       if (error) throw error;
 
-      const formattedHoldings: Holding[] = data.map(holding => {
-        const currentPrice = holding.current_price || holding.purchase_price * (1 + (Math.random() - 0.5) * 0.2);
+      // Fetch real-time prices for each holding
+      const formattedHoldings: Holding[] = await Promise.all(data.map(async (holding) => {
+        let currentPrice = holding.current_price;
+        
+        try {
+          // Fetch current market data
+          const { data: marketData } = await supabase.functions.invoke('market-data', {
+            body: { 
+              symbol: holding.symbol, 
+              type: holding.asset_type || 'stock' 
+            }
+          });
+          
+          if (marketData && marketData.price) {
+            currentPrice = marketData.price;
+            
+            // Update the database with the latest price
+            await supabase
+              .from('holdings')
+              .update({
+                current_price: currentPrice,
+                last_price_update: new Date().toISOString()
+              })
+              .eq('id', holding.id);
+          }
+        } catch (priceError) {
+          console.error('Error fetching price for', holding.symbol, priceError);
+          // Fallback to stored price or simulated price
+          currentPrice = holding.current_price || holding.purchase_price * (1 + (Math.random() - 0.5) * 0.2);
+        }
+
         const value = holding.shares * currentPrice;
         const gainLoss = value - (holding.shares * holding.purchase_price);
         const gainLossPercent = (gainLoss / (holding.shares * holding.purchase_price)) * 100;
@@ -94,9 +125,10 @@ const Portfolio = () => {
           currentPrice,
           value,
           gainLoss,
-          gainLossPercent
+          gainLossPercent,
+          assetType: holding.asset_type || 'stock'
         };
-      });
+      }));
 
       setHoldings(formattedHoldings);
     } catch (error) {
@@ -123,27 +155,49 @@ const Portfolio = () => {
       setIsProcessing(true);
       const shares = parseFloat(newHolding.shares);
       const purchasePrice = parseFloat(newHolding.purchasePrice);
-      const currentPrice = purchasePrice * (1 + (Math.random() - 0.5) * 0.2);
+      
+      // Try to fetch current market data for the symbol
+      let currentPrice = purchasePrice;
+      let assetName = newHolding.name;
+      
+      try {
+        const { data: marketData } = await supabase.functions.invoke('market-data', {
+          body: { 
+            symbol: newHolding.symbol, 
+            type: newHolding.assetType 
+          }
+        });
+        
+        if (marketData && marketData.price) {
+          currentPrice = marketData.price;
+          assetName = marketData.name || assetName;
+        }
+      } catch (marketError) {
+        console.error('Error fetching market data:', marketError);
+        // Use fallback pricing
+        currentPrice = purchasePrice * (1 + (Math.random() - 0.5) * 0.2);
+      }
 
       const { error } = await supabase
         .from('holdings')
         .insert({
           user_id: user.id,
           symbol: newHolding.symbol.toUpperCase(),
-          name: newHolding.name || `${newHolding.symbol.toUpperCase()} Corporation`,
+          name: assetName || `${newHolding.symbol.toUpperCase()} ${newHolding.assetType === 'crypto' ? 'Token' : 'Corporation'}`,
           shares,
           purchase_price: purchasePrice,
-          current_price: currentPrice
+          current_price: currentPrice,
+          asset_type: newHolding.assetType
         });
 
       if (error) throw error;
 
       await fetchHoldings();
-      setNewHolding({ symbol: "", name: "", shares: "", purchasePrice: "" });
+      setNewHolding({ symbol: "", name: "", shares: "", purchasePrice: "", assetType: "stock" });
       
       toast({
         title: "Success",
-        description: "Holding added to your portfolio"
+        description: `${newHolding.assetType === 'crypto' ? 'Cryptocurrency' : 'Stock'} added to your portfolio`
       });
     } catch (error) {
       console.error('Error adding holding:', error);
@@ -451,10 +505,13 @@ const Portfolio = () => {
                         <X className="h-3 w-3" />
                       </Button>
                       <div className="flex-1 pr-8">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <span className="font-semibold">{holding.symbol}</span>
-                          <Badge variant="outline">{holding.shares} shares</Badge>
-                        </div>
+                         <div className="flex items-center space-x-2 mb-1">
+                           <span className="font-semibold">{holding.symbol}</span>
+                           <Badge variant="outline">{holding.shares} shares</Badge>
+                           {holding.assetType === 'crypto' && (
+                             <Badge variant="secondary" className="bg-orange-100 text-orange-800">CRYPTO</Badge>
+                           )}
+                         </div>
                         <p className="text-sm text-slate-600">{holding.name}</p>
                         <p className="text-sm text-slate-500">
                           Avg Cost: ${holding.purchasePrice.toFixed(2)} | Current: ${holding.currentPrice.toFixed(2)}
@@ -477,45 +534,66 @@ const Portfolio = () => {
           <Card>
             <CardHeader>
               <CardTitle>Add New Holding</CardTitle>
-              <CardDescription>Add a new stock to your portfolio</CardDescription>
+              <CardDescription>Add stocks or cryptocurrencies to your portfolio</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="symbol">Stock Symbol *</Label>
+                  <Label htmlFor="assetType">Asset Type</Label>
+                  <select
+                    id="assetType"
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    value={newHolding.assetType}
+                    onChange={(e) => setNewHolding({ ...newHolding, assetType: e.target.value })}
+                  >
+                    <option value="stock">Stock</option>
+                    <option value="crypto">Cryptocurrency</option>
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="symbol">
+                    {newHolding.assetType === 'crypto' ? 'Crypto Symbol' : 'Stock Symbol'} *
+                  </Label>
                   <Input
                     id="symbol"
-                    placeholder="e.g., AAPL"
+                    placeholder={newHolding.assetType === 'crypto' ? 'e.g., BTC, ETH' : 'e.g., AAPL'}
                     value={newHolding.symbol}
                     onChange={(e) => setNewHolding({ ...newHolding, symbol: e.target.value })}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="name">Company Name</Label>
+                  <Label htmlFor="name">
+                    {newHolding.assetType === 'crypto' ? 'Token Name' : 'Company Name'}
+                  </Label>
                   <Input
                     id="name"
-                    placeholder="e.g., Apple Inc."
+                    placeholder={newHolding.assetType === 'crypto' ? 'e.g., Bitcoin' : 'e.g., Apple Inc.'}
                     value={newHolding.name}
                     onChange={(e) => setNewHolding({ ...newHolding, name: e.target.value })}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="shares">Number of Shares *</Label>
+                  <Label htmlFor="shares">
+                    {newHolding.assetType === 'crypto' ? 'Amount' : 'Number of Shares'} *
+                  </Label>
                   <Input
                     id="shares"
                     type="number"
-                    placeholder="100"
+                    step={newHolding.assetType === 'crypto' ? '0.00000001' : '1'}
+                    placeholder={newHolding.assetType === 'crypto' ? '0.5' : '100'}
                     value={newHolding.shares}
                     onChange={(e) => setNewHolding({ ...newHolding, shares: e.target.value })}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="price">Purchase Price per Share *</Label>
+                  <Label htmlFor="price">
+                    Purchase Price per {newHolding.assetType === 'crypto' ? 'Token' : 'Share'} *
+                  </Label>
                   <Input
                     id="price"
                     type="number"
                     step="0.01"
-                    placeholder="150.00"
+                    placeholder={newHolding.assetType === 'crypto' ? '65000.00' : '150.00'}
                     value={newHolding.purchasePrice}
                     onChange={(e) => setNewHolding({ ...newHolding, purchasePrice: e.target.value })}
                   />
