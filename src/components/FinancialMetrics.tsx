@@ -1,23 +1,98 @@
 
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, TrendingDown, DollarSign, BarChart3 } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, BarChart3, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface FinancialMetricsProps {
   symbol: string;
 }
 
-export const FinancialMetrics = ({ symbol }: FinancialMetricsProps) => {
-  // Mock data - in a real app, this would come from a financial API
-  const financialData = {
-    revenue: { value: "394.3B", change: 8.1, period: "TTM" },
-    netIncome: { value: "99.8B", change: 5.4, period: "TTM" },
-    eps: { value: "6.13", change: 4.8, period: "TTM" },
-    peRatio: { value: "30.3", change: -2.1, period: "Current" },
-    grossMargin: { value: "44.1%", change: 1.2, period: "TTM" },
-    operatingMargin: { value: "29.8%", change: 0.8, period: "TTM" },
-    roe: { value: "26.4%", change: 2.3, period: "TTM" },
-    debtToEquity: { value: "1.73", change: -0.15, period: "Current" },
+interface FinancialData {
+  symbol: string;
+  revenue: {
+    value: string;
+    raw: number;
+    change: number;
+    period: string;
   };
+  netIncome: {
+    value: string;
+    raw: number;
+    change: number;
+    period: string;
+  };
+  eps: {
+    value: string;
+    raw: number;
+    change: number;
+    period: string;
+  };
+  peRatio: {
+    value: string;
+    raw: number;
+    change: number;
+    period: string;
+  };
+  grossMargin: {
+    value: string;
+    raw: number;
+    change: number;
+    period: string;
+  };
+  operatingMargin: {
+    value: string;
+    raw: number;
+    change: number;
+    period: string;
+  };
+  roe: {
+    value: string;
+    raw: number;
+    change: number;
+    period: string;
+  };
+  debtToEquity: {
+    value: string;
+    raw: number;
+    change: number;
+    period: string;
+  };
+}
+
+export const FinancialMetrics = ({ symbol }: FinancialMetricsProps) => {
+  const { toast } = useToast();
+  const [financialData, setFinancialData] = useState<FinancialData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFinancialData = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('market-data', {
+          body: { symbol, dataType: 'financials' }
+        });
+        
+        if (error) throw error;
+        
+        setFinancialData(data);
+      } catch (error) {
+        console.error('Error fetching financial data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch financial data for " + symbol,
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (symbol) {
+      fetchFinancialData();
+    }
+  }, [symbol, toast]);
 
   const MetricCard = ({ 
     title, 
@@ -36,10 +111,12 @@ export const FinancialMetrics = ({ symbol }: FinancialMetricsProps) => {
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-2">
           <Icon className="h-4 w-4 text-gray-400" />
-          <span className={`text-xs flex items-center gap-1 ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-            {Math.abs(change)}%
-          </span>
+          {change !== 0 && (
+            <span className={`text-xs flex items-center gap-1 ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+              {Math.abs(change).toFixed(1)}%
+            </span>
+          )}
         </div>
         <div className="space-y-1">
           <p className="text-2xl font-bold">{value}</p>
@@ -50,11 +127,36 @@ export const FinancialMetrics = ({ symbol }: FinancialMetricsProps) => {
     </Card>
   );
 
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="p-6 flex items-center justify-center">
+            <Loader2 className="h-6 w-6 animate-spin" />
+            <span className="ml-2">Loading financial data...</span>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!financialData) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="p-6">
+            <p className="text-center text-gray-500">No financial data available</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Financial Overview - {symbol}</CardTitle>
+          <CardTitle>Financial Overview - {financialData.symbol}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -74,7 +176,7 @@ export const FinancialMetrics = ({ symbol }: FinancialMetricsProps) => {
             />
             <MetricCard
               title="EPS"
-              value={financialData.eps.value}
+              value={`$${financialData.eps.value}`}
               change={financialData.eps.change}
               period={financialData.eps.period}
               icon={BarChart3}

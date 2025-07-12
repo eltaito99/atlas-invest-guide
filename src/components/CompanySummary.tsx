@@ -1,36 +1,111 @@
 
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building, MapPin, Users, TrendingUp } from "lucide-react";
+import { Building, MapPin, Users, TrendingUp, TrendingDown, Loader2, Globe } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface CompanySummaryProps {
   symbol: string;
 }
 
+interface CompanyData {
+  symbol: string;
+  name: string;
+  price: number;
+  change: number;
+  changePercent: number;
+  sector: string;
+  industry: string;
+  marketCap: number;
+  employees: string | number;
+  headquarters: string;
+  description: string;
+  website: string;
+  currency: string;
+  volume: number;
+  high52w: number;
+  low52w: number;
+  pe: number;
+  eps: number;
+  beta: number;
+  dividendYield: number;
+}
+
 export const CompanySummary = ({ symbol }: CompanySummaryProps) => {
-  // Mock data - in a real app, this would come from an API
-  const companyData = {
-    AAPL: {
-      name: "Apple Inc.",
-      price: 185.64,
-      change: 2.34,
-      changePercent: 1.28,
-      sector: "Technology",
-      industry: "Consumer Electronics",
-      marketCap: "2.89T",
-      employees: "164,000",
-      headquarters: "Cupertino, CA",
-      description: "Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories worldwide. The company serves consumers, and small and mid-sized businesses; and the education, enterprise, and government markets."
+  const { toast } = useToast();
+  const [data, setData] = useState<CompanyData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCompanyData = async () => {
+      setLoading(true);
+      try {
+        const { data: companyData, error } = await supabase.functions.invoke('market-data', {
+          body: { symbol, dataType: 'company' }
+        });
+        
+        if (error) throw error;
+        
+        setData(companyData);
+      } catch (error) {
+        console.error('Error fetching company data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch company data for " + symbol,
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (symbol) {
+      fetchCompanyData();
     }
+  }, [symbol, toast]);
+
+  const formatMarketCap = (value: number) => {
+    if (value >= 1e12) return `$${(value / 1e12).toFixed(1)}T`;
+    if (value >= 1e9) return `$${(value / 1e9).toFixed(1)}B`;
+    if (value >= 1e6) return `$${(value / 1e6).toFixed(1)}M`;
+    return `$${value.toFixed(0)}`;
   };
 
-  const data = companyData[symbol as keyof typeof companyData] || companyData.AAPL;
+  const formatEmployees = (value: string | number) => {
+    if (typeof value === 'number') {
+      return value.toLocaleString();
+    }
+    return value;
+  };
+
+  if (loading) {
+    return (
+      <Card className="h-fit">
+        <CardContent className="p-6 flex items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span className="ml-2">Loading company data...</span>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Card className="h-fit">
+        <CardContent className="p-6">
+          <p className="text-center text-gray-500">No company data available</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="h-fit">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xl">{symbol}</CardTitle>
+          <CardTitle className="text-xl">{data.symbol}</CardTitle>
           <Badge variant="outline" className="bg-green-50 text-green-700">
             {data.sector}
           </Badge>
@@ -41,10 +116,10 @@ export const CompanySummary = ({ symbol }: CompanySummaryProps) => {
         {/* Price */}
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-2xl font-bold">${data.price}</span>
+            <span className="text-2xl font-bold">${data.price.toFixed(2)}</span>
             <span className={`text-sm flex items-center gap-1 ${data.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              <TrendingUp className="h-3 w-3" />
-              +{data.change} ({data.changePercent}%)
+              {data.change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+              {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)} ({data.changePercent.toFixed(2)}%)
             </span>
           </div>
         </div>
@@ -54,17 +129,51 @@ export const CompanySummary = ({ symbol }: CompanySummaryProps) => {
           <div className="flex items-center gap-2 text-sm">
             <Building className="h-4 w-4 text-gray-400" />
             <span className="text-gray-600">Market Cap:</span>
-            <span className="font-medium">${data.marketCap}</span>
+            <span className="font-medium">{formatMarketCap(data.marketCap)}</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <Users className="h-4 w-4 text-gray-400" />
             <span className="text-gray-600">Employees:</span>
-            <span className="font-medium">{data.employees}</span>
+            <span className="font-medium">{formatEmployees(data.employees)}</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <MapPin className="h-4 w-4 text-gray-400" />
             <span className="text-gray-600">HQ:</span>
             <span className="font-medium">{data.headquarters}</span>
+          </div>
+          {data.website && data.website !== 'N/A' && (
+            <div className="flex items-center gap-2 text-sm">
+              <Globe className="h-4 w-4 text-gray-400" />
+              <span className="text-gray-600">Website:</span>
+              <a 
+                href={data.website} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="font-medium text-blue-600 hover:underline"
+              >
+                {data.website.replace(/^https?:\/\//, '')}
+              </a>
+            </div>
+          )}
+        </div>
+
+        {/* Additional Metrics */}
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span className="text-gray-600">P/E Ratio:</span>
+            <div className="font-medium">{data.pe ? data.pe.toFixed(2) : 'N/A'}</div>
+          </div>
+          <div>
+            <span className="text-gray-600">EPS:</span>
+            <div className="font-medium">${data.eps ? data.eps.toFixed(2) : 'N/A'}</div>
+          </div>
+          <div>
+            <span className="text-gray-600">Beta:</span>
+            <div className="font-medium">{data.beta ? data.beta.toFixed(2) : 'N/A'}</div>
+          </div>
+          <div>
+            <span className="text-gray-600">Div Yield:</span>
+            <div className="font-medium">{data.dividendYield ? `${data.dividendYield.toFixed(2)}%` : 'N/A'}</div>
           </div>
         </div>
 
