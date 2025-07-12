@@ -190,6 +190,27 @@ export type Database = {
         }
         Relationships: []
       }
+      secrets: {
+        Row: {
+          id: string
+          key_name: string | null
+          key_value: string | null
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          key_name?: string | null
+          key_value?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          key_name?: string | null
+          key_value?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
