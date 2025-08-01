@@ -74,7 +74,8 @@ export const CompanySummary = ({ symbol, marketData }: CompanySummaryProps) => {
     }
   }, [symbol, marketData, toast]);
 
-  const formatMarketCap = (value: number) => {
+  const formatMarketCap = (value: number | undefined | null) => {
+    if (!value || isNaN(value)) return 'N/A';
     if (value >= 1e12) return `$${(value / 1e12).toFixed(1)}T`;
     if (value >= 1e9) return `$${(value / 1e9).toFixed(1)}B`;
     if (value >= 1e6) return `$${(value / 1e6).toFixed(1)}M`;
@@ -124,11 +125,13 @@ export const CompanySummary = ({ symbol, marketData }: CompanySummaryProps) => {
         {/* Price */}
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-2xl font-bold">${data.price.toFixed(2)}</span>
-            <span className={`text-sm flex items-center gap-1 ${data.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {data.change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-              {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)} ({data.changePercent.toFixed(2)}%)
-            </span>
+            <span className="text-2xl font-bold">${data.price ? data.price.toFixed(2) : 'N/A'}</span>
+            {data.change !== undefined && data.changePercent !== undefined && (
+              <span className={`text-sm flex items-center gap-1 ${data.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {data.change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                {data.change >= 0 ? '+' : ''}{data.change.toFixed(2)} ({data.changePercent.toFixed(2)}%)
+              </span>
+            )}
           </div>
         </div>
 
