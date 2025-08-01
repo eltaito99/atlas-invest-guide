@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 interface FinancialMetricsProps {
   symbol: string;
+  marketData?: any;
 }
 
 interface FinancialData {
@@ -61,12 +62,19 @@ interface FinancialData {
   };
 }
 
-export const FinancialMetrics = ({ symbol }: FinancialMetricsProps) => {
+export const FinancialMetrics = ({ symbol, marketData }: FinancialMetricsProps) => {
   const { toast } = useToast();
   const [financialData, setFinancialData] = useState<FinancialData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // If marketData is provided and has financials, use it directly
+    if (marketData && marketData.financials) {
+      setFinancialData(marketData.financials);
+      setLoading(false);
+      return;
+    }
+
     const fetchFinancialData = async () => {
       setLoading(true);
       try {
@@ -92,7 +100,7 @@ export const FinancialMetrics = ({ symbol }: FinancialMetricsProps) => {
     if (symbol) {
       fetchFinancialData();
     }
-  }, [symbol, toast]);
+  }, [symbol, marketData, toast]);
 
   const MetricCard = ({ 
     title, 

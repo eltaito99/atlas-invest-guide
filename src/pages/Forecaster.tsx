@@ -100,7 +100,7 @@ const Forecaster = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Company Summary */}
           <div className="lg:col-span-1">
-            <CompanySummary symbol={selectedStock} />
+            <CompanySummary symbol={selectedStock} marketData={marketData} />
           </div>
 
           {/* Right Column - Analysis Tabs */}
@@ -130,7 +130,7 @@ const Forecaster = () => {
               </TabsContent>
 
               <TabsContent value="financials" className="mt-6">
-                <FinancialMetrics symbol={selectedStock} />
+                <FinancialMetrics symbol={selectedStock} marketData={marketData} />
               </TabsContent>
 
               <TabsContent value="valuation" className="mt-6">

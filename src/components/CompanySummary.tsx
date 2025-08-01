@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 interface CompanySummaryProps {
   symbol: string;
+  marketData?: any;
 }
 
 interface CompanyData {
@@ -33,12 +34,19 @@ interface CompanyData {
   dividendYield: number;
 }
 
-export const CompanySummary = ({ symbol }: CompanySummaryProps) => {
+export const CompanySummary = ({ symbol, marketData }: CompanySummaryProps) => {
   const { toast } = useToast();
   const [data, setData] = useState<CompanyData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // If marketData is provided, use it directly
+    if (marketData) {
+      setData(marketData);
+      setLoading(false);
+      return;
+    }
+
     const fetchCompanyData = async () => {
       setLoading(true);
       try {
@@ -64,7 +72,7 @@ export const CompanySummary = ({ symbol }: CompanySummaryProps) => {
     if (symbol) {
       fetchCompanyData();
     }
-  }, [symbol, toast]);
+  }, [symbol, marketData, toast]);
 
   const formatMarketCap = (value: number) => {
     if (value >= 1e12) return `$${(value / 1e12).toFixed(1)}T`;
