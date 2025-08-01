@@ -168,23 +168,49 @@ export const CompanySummary = ({ symbol, marketData }: CompanySummaryProps) => {
           )}
         </div>
 
-        {/* Additional Metrics */}
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-gray-600">P/E Ratio:</span>
-            <div className="font-medium">{data.pe ? data.pe.toFixed(2) : 'N/A'}</div>
+        {/* Financial Ratios */}
+        <div>
+          <h4 className="font-medium mb-3">Key Financial Ratios</h4>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <span className="text-gray-600">P/E Ratio:</span>
+              <div className="font-medium text-lg">{data.pe ? data.pe.toFixed(2) : 'N/A'}</div>
+            </div>
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <span className="text-gray-600">EPS:</span>
+              <div className="font-medium text-lg">${data.eps ? data.eps.toFixed(2) : 'N/A'}</div>
+            </div>
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <span className="text-gray-600">Beta:</span>
+              <div className="font-medium text-lg">{data.beta ? data.beta.toFixed(2) : 'N/A'}</div>
+            </div>
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <span className="text-gray-600">Div Yield:</span>
+              <div className="font-medium text-lg">{data.dividendYield ? `${data.dividendYield.toFixed(2)}%` : 'N/A'}</div>
+            </div>
           </div>
-          <div>
-            <span className="text-gray-600">EPS:</span>
-            <div className="font-medium">${data.eps ? data.eps.toFixed(2) : 'N/A'}</div>
-          </div>
-          <div>
-            <span className="text-gray-600">Beta:</span>
-            <div className="font-medium">{data.beta ? data.beta.toFixed(2) : 'N/A'}</div>
-          </div>
-          <div>
-            <span className="text-gray-600">Div Yield:</span>
-            <div className="font-medium">{data.dividendYield ? `${data.dividendYield.toFixed(2)}%` : 'N/A'}</div>
+        </div>
+
+        {/* Trading Information */}
+        <div>
+          <h4 className="font-medium mb-3">Trading Information</h4>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <span className="text-gray-600">Volume:</span>
+              <div className="font-medium text-lg">{data.volume ? data.volume.toLocaleString() : 'N/A'}</div>
+            </div>
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <span className="text-gray-600">52W High:</span>
+              <div className="font-medium text-lg">${data.high52w ? data.high52w.toFixed(2) : 'N/A'}</div>
+            </div>
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <span className="text-gray-600">52W Low:</span>
+              <div className="font-medium text-lg">${data.low52w ? data.low52w.toFixed(2) : 'N/A'}</div>
+            </div>
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <span className="text-gray-600">Currency:</span>
+              <div className="font-medium text-lg">{data.currency || 'USD'}</div>
+            </div>
           </div>
         </div>
 
