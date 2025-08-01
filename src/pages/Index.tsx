@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ArrowUp, TrendingUp, Shield, Bell } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Chatbot } from "@/components/Chatbot";
+import { CountdownTimer } from "@/components/CountdownTimer";
 
 const Index = () => {
   return (
@@ -105,6 +106,13 @@ const Index = () => {
               </CardDescription>
             </CardContent>
           </Card>
+        </div>
+      </section>
+
+      {/* Countdown Section */}
+      <section className="container mx-auto px-6 py-20">
+        <div className="max-w-2xl mx-auto">
+          <CountdownTimer />
         </div>
       </section>
 

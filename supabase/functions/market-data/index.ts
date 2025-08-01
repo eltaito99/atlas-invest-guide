@@ -13,7 +13,12 @@ serve(async (req) => {
   }
 
   try {
-    const { symbol, type = 'stock', dataType = 'basic' } = await req.json();
+    const body = await req.text();
+    if (!body || body.trim() === '') {
+      throw new Error('Empty request body');
+    }
+    
+    const { symbol, type = 'stock', dataType = 'basic' } = JSON.parse(body);
     
     if (!symbol) {
       throw new Error('Symbol is required');
