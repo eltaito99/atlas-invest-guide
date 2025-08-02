@@ -1,52 +1,53 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { ComposedChart, Bar, XAxis, YAxis, ResponsiveContainer } from "recharts";
+import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
+import { ComposedChart, Bar, XAxis, YAxis, ResponsiveContainer, Brush } from "recharts";
 
 interface StockChartProps {
   symbol: string;
 }
 
 export const StockChart = ({ symbol }: StockChartProps) => {
-  // Generate 2 years of daily mock candlestick data
+  // Generate 2 years of daily mock candlestick data (oldest to newest)
   const generateDailyData = () => {
     const data = [];
     const startDate = new Date();
     startDate.setFullYear(startDate.getFullYear() - 2);
     
-    let currentPrice = 150;
+    let currentPrice = 120; // Start with lower price
     
-    for (let i = 0; i < 730; i++) { // 2 years of daily data
+    for (let i = 0; i < 500; i++) { // 500 trading days (~2 years)
       const date = new Date(startDate);
       date.setDate(date.getDate() + i);
       
       // Skip weekends for realistic stock data
       if (date.getDay() === 0 || date.getDay() === 6) continue;
       
-      // Generate realistic price movements
-      const volatility = 0.02;
-      const trend = 0.0002;
+      // Generate realistic price movements with upward trend
+      const volatility = 0.025;
+      const trend = 0.0008; // Slight upward trend
       const randomChange = (Math.random() - 0.5) * volatility;
       
       const open = currentPrice;
       const change = currentPrice * (trend + randomChange);
-      const close = Math.max(1, currentPrice + change);
+      const close = Math.max(10, currentPrice + change);
       
       // Generate high and low based on open and close
       const minPrice = Math.min(open, close);
       const maxPrice = Math.max(open, close);
-      const wiggleRoom = Math.abs(open - close) * 0.5 + currentPrice * 0.01;
+      const wiggleRoom = Math.abs(open - close) * 0.5 + currentPrice * 0.015;
       
       const high = maxPrice + Math.random() * wiggleRoom;
-      const low = Math.max(1, minPrice - Math.random() * wiggleRoom);
+      const low = Math.max(10, minPrice - Math.random() * wiggleRoom);
       
       // Generate realistic volume
-      const baseVolume = 25000000;
+      const baseVolume = 28000000;
       const volumeVariation = Math.random() * 0.8 + 0.6; // 60% to 140% of base
       const volume = Math.floor(baseVolume * volumeVariation);
       
       data.push({
         date: date.toISOString().split('T')[0],
+        dateObj: date,
         open: Number(open.toFixed(2)),
         high: Number(high.toFixed(2)),
         low: Number(low.toFixed(2)),
@@ -57,7 +58,7 @@ export const StockChart = ({ symbol }: StockChartProps) => {
       currentPrice = close;
     }
     
-    return data.reverse(); // Most recent first
+    return data; // Chronological order (oldest first)
   };
 
   const chartData = generateDailyData();
@@ -113,16 +114,18 @@ export const StockChart = ({ symbol }: StockChartProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-[500px] w-full">
-          <ComposedChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+        <ChartContainer config={chartConfig} className="h-[600px] w-full">
+          <ComposedChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
             <XAxis 
               dataKey="date" 
-              tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', year: '2-digit' })}
+              tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               interval="preserveStartEnd"
+              tick={{ fontSize: 12 }}
             />
             <YAxis 
-              domain={['dataMin - 2', 'dataMax + 2']} 
+              domain={[0, 'dataMax + 10']} 
               tickFormatter={(value) => `$${value.toFixed(0)}`}
+              tick={{ fontSize: 12 }}
             />
             <ChartTooltip 
               content={({ active, payload, label }) => {
@@ -163,6 +166,12 @@ export const StockChart = ({ symbol }: StockChartProps) => {
               }}
             />
             <Bar dataKey="close" shape={<CandlestickBar />} />
+            <Brush 
+              dataKey="date" 
+              height={30} 
+              stroke="hsl(142 71% 45%)"
+              tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short' })}
+            />
           </ComposedChart>
         </ChartContainer>
       </CardContent>
