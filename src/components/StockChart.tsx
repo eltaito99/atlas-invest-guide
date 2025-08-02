@@ -38,7 +38,7 @@ export const StockChart = ({ symbol }: StockChartProps) => {
           y1={y + (high - Math.max(open, close)) * height / (high - low)}
           x2={x + width / 2}
           y2={y + (high - Math.min(open, close)) * height / (high - low)}
-          stroke={isGreen ? "hsl(var(--primary))" : "hsl(var(--destructive))"}
+          stroke={isGreen ? "hsl(142 71% 45%)" : "hsl(210 100% 60%)"}
           strokeWidth={1}
         />
         {/* Body */}
@@ -47,8 +47,8 @@ export const StockChart = ({ symbol }: StockChartProps) => {
           y={y + (high - Math.max(open, close)) * height / (high - low)}
           width={width * 0.6}
           height={(bodyHeight * height) / (high - low)}
-          fill={isGreen ? "hsl(var(--primary))" : "hsl(var(--destructive))"}
-          stroke={isGreen ? "hsl(var(--primary))" : "hsl(var(--destructive))"}
+          fill={isGreen ? "hsl(142 71% 45%)" : "hsl(210 100% 60%)"}
+          stroke={isGreen ? "hsl(142 71% 45%)" : "hsl(210 100% 60%)"}
           strokeWidth={1}
         />
       </g>

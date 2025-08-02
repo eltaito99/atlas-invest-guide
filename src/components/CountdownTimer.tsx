@@ -38,28 +38,28 @@ export const CountdownTimer = () => {
   const formatNumber = (num: number) => num.toString().padStart(2, '0');
 
   return (
-    <Card className="bg-gradient-to-br from-primary/20 via-background to-secondary/20 border-primary/30 shadow-2xl">
+    <Card className="bg-gradient-to-br from-green-500/20 via-background to-blue-500/20 border-green-500/30 shadow-2xl">
       <CardContent className="p-8 text-center">
-        <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">
+        <h3 className="text-2xl font-bold bg-gradient-to-r from-green-500 to-blue-500 bg-clip-text text-transparent mb-2">
           Next Platform Release
         </h3>
         <p className="text-muted-foreground mb-6">Enhanced AI features coming soon</p>
         
         <div className="grid grid-cols-4 gap-4 mb-6">
-          <div className="bg-primary/10 rounded-lg p-4 backdrop-blur-sm border border-primary/20 hover:border-primary/40 transition-colors">
-            <div className="text-4xl font-bold text-primary mb-1">{formatNumber(timeLeft.days)}</div>
+          <div className="bg-green-500/10 rounded-lg p-4 backdrop-blur-sm border border-green-500/20 hover:border-green-500/40 transition-colors">
+            <div className="text-4xl font-bold text-green-500 mb-1">{formatNumber(timeLeft.days)}</div>
             <div className="text-sm text-muted-foreground uppercase tracking-wide">Days</div>
           </div>
-          <div className="bg-secondary/10 rounded-lg p-4 backdrop-blur-sm border border-secondary/20 hover:border-secondary/40 transition-colors">
-            <div className="text-4xl font-bold text-secondary mb-1">{formatNumber(timeLeft.hours)}</div>
+          <div className="bg-blue-500/10 rounded-lg p-4 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-colors">
+            <div className="text-4xl font-bold text-blue-500 mb-1">{formatNumber(timeLeft.hours)}</div>
             <div className="text-sm text-muted-foreground uppercase tracking-wide">Hours</div>
           </div>
-          <div className="bg-primary/10 rounded-lg p-4 backdrop-blur-sm border border-primary/20 hover:border-primary/40 transition-colors">
-            <div className="text-4xl font-bold text-primary mb-1">{formatNumber(timeLeft.minutes)}</div>
+          <div className="bg-green-500/10 rounded-lg p-4 backdrop-blur-sm border border-green-500/20 hover:border-green-500/40 transition-colors">
+            <div className="text-4xl font-bold text-green-500 mb-1">{formatNumber(timeLeft.minutes)}</div>
             <div className="text-sm text-muted-foreground uppercase tracking-wide">Minutes</div>
           </div>
-          <div className="bg-secondary/10 rounded-lg p-4 backdrop-blur-sm border border-secondary/20 hover:border-secondary/40 transition-colors">
-            <div className="text-4xl font-bold text-secondary mb-1">{formatNumber(timeLeft.seconds)}</div>
+          <div className="bg-blue-500/10 rounded-lg p-4 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-colors">
+            <div className="text-4xl font-bold text-blue-500 mb-1">{formatNumber(timeLeft.seconds)}</div>
             <div className="text-sm text-muted-foreground uppercase tracking-wide">Seconds</div>
           </div>
         </div>
