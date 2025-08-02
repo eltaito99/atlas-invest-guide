@@ -60,29 +60,151 @@ export const CompanySummary = ({ symbol, marketData }: CompanySummaryProps) => {
       } catch (error) {
         console.error('Error fetching company data:', error);
         
-        // Use mock data when API fails
-        const mockCompanyData = {
-          symbol: symbol,
-          name: `${symbol} Inc.`,
-          price: 175.42,
-          change: 2.15,
-          changePercent: 1.24,
-          sector: "Technology",
-          industry: "Software",
-          marketCap: 2850000000000,
-          employees: 164000,
-          headquarters: "Cupertino, CA, USA",
-          description: `${symbol} is a multinational technology company that designs, develops, and sells consumer electronics, computer software, and online services. The company is known for its innovative products and services across multiple technology segments.`,
-          website: "https://www.apple.com",
-          currency: "USD",
-          volume: 45623000,
-          high52w: 198.23,
-          low52w: 145.03,
-          pe: 28.5,
-          eps: 6.15,
-          beta: 1.23,
-          dividendYield: 0.44
+        // Use symbol-specific mock data when API fails
+        const getCompanyMockData = (symbol: string) => {
+          switch(symbol.toUpperCase()) {
+            case 'AAPL':
+              return {
+                symbol: 'AAPL',
+                name: 'Apple Inc.',
+                price: 180.75,
+                change: -2.45,
+                changePercent: -1.34,
+                sector: 'Technology',
+                industry: 'Consumer Electronics',
+                marketCap: 2850000000000,
+                employees: 164000,
+                headquarters: 'Cupertino, CA, USA',
+                description: 'Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories worldwide. The company operates through iPhone, Mac, iPad, Wearables, Home and Accessories, and Services segments.',
+                website: 'https://www.apple.com',
+                currency: 'USD',
+                volume: 45623000,
+                high52w: 199.62,
+                low52w: 164.08,
+                pe: 29.4,
+                eps: 6.13,
+                beta: 1.29,
+                dividendYield: 0.47
+              };
+            case 'MSFT':
+              return {
+                symbol: 'MSFT',
+                name: 'Microsoft Corporation',
+                price: 425.31,
+                change: 8.21,
+                changePercent: 1.97,
+                sector: 'Technology',
+                industry: 'Software',
+                marketCap: 3160000000000,
+                employees: 228000,
+                headquarters: 'Redmond, WA, USA',
+                description: 'Microsoft Corporation develops, licenses, and supports software, services, devices, and solutions worldwide. The company operates through Productivity and Business Processes, Intelligent Cloud, and More Personal Computing segments.',
+                website: 'https://www.microsoft.com',
+                currency: 'USD',
+                volume: 28000000,
+                high52w: 468.35,
+                low52w: 309.45,
+                pe: 35.8,
+                eps: 11.86,
+                beta: 0.89,
+                dividendYield: 0.68
+              };
+            case 'NVDA':
+              return {
+                symbol: 'NVDA',
+                name: 'NVIDIA Corporation',
+                price: 875.28,
+                change: 15.67,
+                changePercent: 1.82,
+                sector: 'Technology',
+                industry: 'Semiconductors',
+                marketCap: 2150000000000,
+                employees: 29600,
+                headquarters: 'Santa Clara, CA, USA',
+                description: 'NVIDIA Corporation operates as a visual computing company worldwide. It operates in two segments, Graphics and Compute & Networking. The company develops and markets graphics processing units for gaming, professional visualization, data centers, and automotive markets.',
+                website: 'https://www.nvidia.com',
+                currency: 'USD',
+                volume: 52000000,
+                high52w: 974.00,
+                low52w: 108.13,
+                pe: 65.5,
+                eps: 2.95,
+                beta: 1.68,
+                dividendYield: 0.03
+              };
+            case 'TSLA':
+              return {
+                symbol: 'TSLA',
+                name: 'Tesla, Inc.',
+                price: 248.42,
+                change: -3.15,
+                changePercent: -1.25,
+                sector: 'Consumer Cyclical',
+                industry: 'Auto Manufacturers',
+                marketCap: 791000000000,
+                employees: 140473,
+                headquarters: 'Austin, TX, USA',
+                description: 'Tesla, Inc. designs, develops, manufactures, leases, and sells electric vehicles, and energy generation and storage systems in the United States, China, and internationally. The company operates through Automotive and Energy Generation and Storage segments.',
+                website: 'https://www.tesla.com',
+                currency: 'USD',
+                volume: 88000000,
+                high52w: 299.29,
+                low52w: 138.80,
+                pe: 63.9,
+                eps: 4.73,
+                beta: 2.32,
+                dividendYield: 0.00
+              };
+            case 'META':
+              return {
+                symbol: 'META',
+                name: 'Meta Platforms, Inc.',
+                price: 531.44,
+                change: 12.87,
+                changePercent: 2.48,
+                sector: 'Communication Services',
+                industry: 'Internet Content & Information',
+                marketCap: 1350000000000,
+                employees: 70799,
+                headquarters: 'Menlo Park, CA, USA',
+                description: 'Meta Platforms, Inc. develops products that enable people to connect and share with friends and family through mobile devices, personal computers, virtual reality headsets, and wearables worldwide. It operates through Family of Apps and Reality Labs segments.',
+                website: 'https://www.meta.com',
+                currency: 'USD',
+                volume: 25000000,
+                high52w: 542.81,
+                low52w: 279.49,
+                pe: 24.7,
+                eps: 14.87,
+                beta: 1.12,
+                dividendYield: 0.37
+              };
+            default:
+              return {
+                symbol: symbol,
+                name: `${symbol} Inc.`,
+                price: 175.42,
+                change: 2.15,
+                changePercent: 1.24,
+                sector: 'Technology',
+                industry: 'Software',
+                marketCap: 2850000000000,
+                employees: 164000,
+                headquarters: 'Cupertino, CA, USA',
+                description: `${symbol} is a multinational technology company that designs, develops, and sells consumer electronics, computer software, and online services. The company is known for its innovative products and services across multiple technology segments.`,
+                website: 'https://www.apple.com',
+                currency: 'USD',
+                volume: 45623000,
+                high52w: 198.23,
+                low52w: 145.03,
+                pe: 28.5,
+                eps: 6.15,
+                beta: 1.23,
+                dividendYield: 0.44
+              };
+          }
         };
+
+        const mockCompanyData = getCompanyMockData(symbol);
         
         setData(mockCompanyData);
         
